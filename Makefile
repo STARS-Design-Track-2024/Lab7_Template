@@ -75,8 +75,12 @@ sim: $(SRC)
 check: $(CHK)
 	iceprog -S $(CHK)
 	
-demo:  $(DEM)
-	iceprog -S $(DEM)
+demo:
+	mkdir -p $(BUILD)
+	$(YOSYS) -p "read_verilog -sv $(ICE) support/lock_bb_top.sv blackbox_lock.v $(UART); synth_ice40 -top ice40hx8k; write_json $(BUILD)/$(PROJ).json"
+	$(NEXTPNR) --hx8k --package ct256 --pcf $(PINMAP) --asc $(BUILD)/$(PROJ).asc --json $(BUILD)/$(PROJ).json 2> >(sed -e 's/^.* 0 errors$$//' -e '/^Info:/d' -e '/^[ ]*$$/d' 1>&2)
+	icepack $(BUILD)/$(PROJ).asc $(BUILD)/$(PROJ).bin
+	iceprog $(BUILD)/$(PROJ).bin
 
 flash: $(BUILD)/$(PROJ).bin
 	iceprog $(BUILD)/$(PROJ).bin

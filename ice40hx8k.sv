@@ -21,12 +21,7 @@ module ice40hx8k (hwclk,pb,ss7,ss6,ss5,ss4,ss3,ss2,ss1,ss0,left,right,red,green,
         ctr <= ctr + 1;
 
     assign CTSn = ~1; // clear to send
-    assign DCDn = ~1; // carrier detect (makes Kermit - not the frog (says Megan) - happy)
-
-    assign right[0] = Rx;
-    assign left[0] = Tx;
-    assign left[1] = txready;
-    assign left[2] = txclk;
+    assign DCDn = ~1; // carrier detect (makes Kermit happy)
 
 // Example calculation (SIMPLE):
 //
