@@ -9,7 +9,7 @@ PROJ    = template
 PINMAP  = pinmap.pcf
 CELLS	= support/cells_map_timing.v support/cells_sim_timing.v
 SRC     = top.sv
-TB	    = tb.sv
+TB	= tb.sv
 ICE     = ice40hx8k.sv
 UART    = support/uart.v support/uart_tx.v support/uart_rx.v
 FILES   = $(ICE) $(SRC) $(UART)
@@ -49,6 +49,16 @@ sim: $(SRC)
 	$(YOSYS) -p "read_verilog -sv -noblackbox $(SRC); synth_ice40; write_verilog $(BUILD)/$(PROJ).v"
 	# run simulation
 	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v $(TB) -o $(BUILD)/$(PROJ)
+	vvp $(BUILD)/$(PROJ)
+	gtkwave $(TRACE)
+
+verify_%: $(SRC) tb_%.sv
+	# if build folder doesn't exist, create it
+	mkdir -p $(BUILD)
+	# synthesize with yosys to cell-level Verilog
+	$(YOSYS) -p "read_verilog -sv -noblackbox $(SRC); synth_ice40 -top $*; write_verilog $(BUILD)/$(PROJ).v"
+	# run simulation
+	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v tb_$*.sv -o $(BUILD)/$(PROJ)
 	vvp $(BUILD)/$(PROJ)
 	gtkwave $(TRACE)
 
